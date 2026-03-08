@@ -1,1 +1,230 @@
-index.html
+<!DOCTYPE html>
+<html>
+<head>
+<title>Warden SMP Store</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{margin:0;font-family:Arial;background:#07140f;color:white;}
+
+.navbar{display:flex;justify-content:space-between;padding:12px;background:#0f2a1d;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo img{height:40px;border-radius:10px;}
+.login-btn{background:#22c55e;padding:8px 14px;border-radius:8px;cursor:pointer;}
+.menu{font-size:22px;cursor:pointer;}
+
+.sidebar{position:fixed;top:0;right:0;width:260px;height:100%;
+background:#0f2a1d;transform:translateX(100%);
+transition:0.3s;padding:20px;z-index:1000;}
+.sidebar.active{transform:translateX(0);}
+.sidebar a{display:block;margin:18px 0;cursor:pointer;}
+
+.overlay{position:fixed;width:100%;height:100%;
+background:rgba(0,0,0,0.6);display:none;z-index:900;}
+.overlay.active{display:block;}
+
+.hero{height:200px;background:url('background.png') center/cover;}
+.hero-text{text-align:center;padding:20px;}
+
+.container{padding:15px;}
+
+.card{background:#12271c;border-radius:12px;padding:20px;margin-top:15px;}
+
+button{margin-top:10px;padding:10px;width:100%;background:#22c55e;border:none;border-radius:8px;}
+
+.toggle-btn{background:#1f3d2b;}
+
+.details{display:none;margin-top:10px;font-size:14px;opacity:0.9;}
+
+.popup{
+position:fixed;top:50%;left:50%;
+transform:translate(-50%,-50%);
+background:#0f2a1d;padding:20px;border-radius:10px;
+display:none;z-index:2000;width:80%;max-width:320px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+<div class="logo">
+<img src="logo.png">
+<b>Warden SMP Store</b>
+</div>
+<div>
+<span class="login-btn" id="loginText" onclick="handleLoginClick()">Login</span>
+<span class="menu" onclick="toggleMenu()">☰</span>
+</div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<div class="sidebar" id="sidebar">
+<a onclick="showPage('ranks')">Ranks</a>
+<a onclick="showPage('kits')">Kits</a>
+<a onclick="showPage('items')">Items</a>
+<a onclick="showPage('staff')">Staff</a>
+</div>
+
+<div class="hero"></div>
+
+<div class="hero-text">
+<h1>Warden SMP Store</h1>
+<p>Best Survival Server Back With Season 2</p>
+</div>
+
+<div class="container" id="content">
+<div class="card"><h2>Welcome 👋</h2></div>
+</div>
+
+<!-- LOGIN -->
+<div class="popup" id="loginBox">
+<h3>Login</h3>
+<input id="username" placeholder="Minecraft Username" style="width:100%;padding:10px;">
+<button onclick="login()">Login</button>
+</div>
+
+<!-- PAYMENT -->
+<div class="popup" id="paymentBox">
+<h3 id="itemName"></h3>
+<p id="itemPrice"></p>
+<img src="qr.png" style="width:200px;border-radius:10px;">
+<p>Send screenshot on Discord</p>
+<a href="https://discord.gg/mqP9RVCzwH" target="_blank">
+<button>Join Discord</button>
+</a>
+<button onclick="closePayment()" style="background:red;">Close</button>
+</div>
+
+<script>
+
+/* VARIABLES */
+let sidebar=document.getElementById("sidebar");
+let overlay=document.getElementById("overlay");
+let loginBox=document.getElementById("loginBox");
+let paymentBox=document.getElementById("paymentBox");
+let content=document.getElementById("content");
+let itemName=document.getElementById("itemName");
+let itemPrice=document.getElementById("itemPrice");
+let loginText=document.getElementById("loginText");
+
+/* MENU */
+function toggleMenu(){
+sidebar.classList.toggle("active");
+overlay.classList.toggle("active");
+}
+
+function closeAll(){
+sidebar.classList.remove("active");
+overlay.classList.remove("active");
+loginBox.style.display="none";
+}
+
+/* LOGIN */
+function login(){
+let n=document.getElementById("username").value;
+if(!n)return alert("Enter username");
+localStorage.setItem("user",n);
+loginText.innerText=n;
+closeAll();
+}
+
+function handleLoginClick(){
+let u=localStorage.getItem("user");
+if(u){
+if(confirm("Logout?")){
+localStorage.removeItem("user");
+loginText.innerText="Login";
+}
+}else{
+loginBox.style.display="block";
+overlay.classList.add("active");
+}
+}
+
+/* PAYMENT */
+function buy(item){
+itemName.innerText=item;
+itemPrice.innerText="User: "+(localStorage.getItem("user")||"Guest");
+paymentBox.style.display="block";
+overlay.classList.add("active");
+}
+
+function closePayment(){
+paymentBox.style.display="none";
+overlay.classList.remove("active");
+}
+
+/* TOGGLE */
+function toggleDetails(id){
+let el=document.getElementById(id);
+el.style.display=(el.style.display==="block")?"none":"block";
+}
+
+/* PAGES */
+function showPage(page){
+
+/* KITS FULL */
+if(page==="kits"){
+content.innerHTML=`
+<div class="card"><h2>🔥 Kits</h2></div>
+
+<div class="card">
+<h3>Elite — ₹69</h3>
+<button class="toggle-btn" onclick="toggleDetails('k1')">View Kit</button>
+<div class="details" id="k1">
+Netherite armor + tools (basic enchant)<br>
+Max bow + food
+</div>
+<button onclick="buy('Elite ₹69')">Buy</button>
+</div>
+
+<div class="card">
+<h3>Max — ₹99</h3>
+<button class="toggle-btn" onclick="toggleDetails('k2')">View Kit</button>
+<div class="details" id="k2">
+Max netherite<br>
+Bow + crossbow + trident + food
+</div>
+<button onclick="buy('Max ₹99')">Buy</button>
+</div>
+
+<div class="card">
+<h3>Warden — ₹699</h3>
+<button class="toggle-btn" onclick="toggleDetails('k9')">View Kit</button>
+<div class="details" id="k9">
+Level 20 enchants<br>
+Full max setup
+</div>
+<button onclick="buy('Warden ₹699')">Buy</button>
+</div>
+`;
+}
+
+/* SIMPLE OTHER PAGES */
+if(page==="ranks"){
+content.innerHTML=`<div class="card"><h2>Ranks Coming Soon</h2></div>`;
+}
+
+if(page==="items"){
+content.innerHTML=`<div class="card"><h2>Items Coming Soon</h2></div>`;
+}
+
+if(page==="staff"){
+content.innerHTML=`<div class="card"><h2>Staff Coming Soon</h2></div>`;
+}
+
+closeAll();
+}
+
+/* LOAD */
+window.onload=()=>{
+let u=localStorage.getItem("user");
+if(u)loginText.innerText=u;
+}
+
+</script>
+
+</body>
+</html>
